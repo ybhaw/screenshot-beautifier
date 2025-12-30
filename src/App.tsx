@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import './App.css'
 import { proportionSections, getProportionById, getSectionForProportion } from './proportions.config'
+import { themeSections, getThemeById, getSectionForTheme } from './theme.config'
 
 interface Settings {
   proportion: string
-  browserTheme: 'none' | 'light' | 'dark'
+  theme: string
   padding: 'none' | 'small' | 'medium' | 'large'
   bgColor1: string
   bgColor2: string
@@ -18,7 +19,7 @@ interface Settings {
 
 const defaultSettings: Settings = {
   proportion: 'auto',
-  browserTheme: 'none',
+  theme: 'none',
   padding: 'medium',
   bgColor1: '#ec4899',
   bgColor2: '#8b5cf6',
@@ -39,11 +40,15 @@ function App() {
   const [isDragging, setIsDragging] = useState(false)
   const [proportionDropdownOpen, setProportionDropdownOpen] = useState(false)
   const [proportionSearch, setProportionSearch] = useState('')
+  const [themeDropdownOpen, setThemeDropdownOpen] = useState(false)
+  const [themeSearch, setThemeSearch] = useState('')
   const [customRatio, setCustomRatio] = useState({ width: 16, height: 9 })
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const proportionDropdownRef = useRef<HTMLDivElement>(null)
+  const themeDropdownRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const themeSearchInputRef = useRef<HTMLInputElement>(null)
 
   const updateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
     setSettings(prev => ({ ...prev, [key]: value }))
@@ -100,6 +105,9 @@ function App() {
       if (proportionDropdownRef.current && !proportionDropdownRef.current.contains(e.target as Node)) {
         setProportionDropdownOpen(false)
       }
+      if (themeDropdownRef.current && !themeDropdownRef.current.contains(e.target as Node)) {
+        setThemeDropdownOpen(false)
+      }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
@@ -115,13 +123,14 @@ function App() {
 
     const padding = paddingValues[settings.padding]
     const innerRadius = radiusValues[settings.innerRadius]
-    const browserBarHeight = settings.browserTheme !== 'none' ? 36 : 0
+    const themeConfig = getThemeById(settings.theme)
+    const themeBarHeight = themeConfig?.barHeight ?? 0
 
     // Calculate dimensions
     let canvasWidth: number
     let canvasHeight: number
     const imgWidth = image.width
-    const imgHeight = image.height + browserBarHeight
+    const imgHeight = image.height + themeBarHeight
 
     const proportionConfig = getProportionById(settings.proportion)
     const ratio = settings.proportion === 'custom'
@@ -229,25 +238,55 @@ function App() {
     ctx.roundRect(imgX, imgY, imgWidth, imgHeight, innerRadius)
     ctx.clip()
 
-    // Draw browser bar if enabled
-    if (settings.browserTheme !== 'none') {
-      const barColor = settings.browserTheme === 'light' ? '#f1f3f4' : '#202124'
-      const dotColors = ['#ff5f56', '#ffbd2e', '#27ca40']
+    // Draw theme bar if enabled
+    if (themeConfig && themeBarHeight > 0) {
+      ctx.fillStyle = themeConfig.barColor
+      ctx.fillRect(imgX, imgY, imgWidth, themeBarHeight)
 
-      ctx.fillStyle = barColor
-      ctx.fillRect(imgX, imgY, imgWidth, browserBarHeight)
+      // Draw window controls
+      if (themeConfig.controls.length > 0) {
+        const controlSpacing = 20
+        const controlStartY = imgY + themeBarHeight / 2
 
-      // Draw traffic light dots
-      dotColors.forEach((color, i) => {
-        ctx.beginPath()
-        ctx.arc(imgX + 20 + i * 20, imgY + browserBarHeight / 2, 6, 0, Math.PI * 2)
-        ctx.fillStyle = color
-        ctx.fill()
-      })
+        if (themeConfig.controlsPosition === 'left') {
+          themeConfig.controls.forEach((control, i) => {
+            const controlX = imgX + 20 + i * controlSpacing
+            if (control.type === 'circle') {
+              ctx.beginPath()
+              ctx.arc(controlX, controlStartY, control.size / 2, 0, Math.PI * 2)
+              ctx.fillStyle = control.color
+              ctx.fill()
+            } else if (control.type === 'icon') {
+              // Draw simple window control icons (minimize, maximize, close)
+              ctx.fillStyle = control.color
+              ctx.font = `${control.size}px Arial`
+              const icons = ['−', '□', '×']
+              ctx.fillText(icons[i] || '−', controlX - 4, controlStartY + 4)
+            }
+          })
+        } else {
+          // Right-aligned controls (Windows style)
+          themeConfig.controls.forEach((control, i) => {
+            const controlX = imgX + imgWidth - 20 - (themeConfig.controls.length - 1 - i) * (controlSpacing + 26)
+            if (control.type === 'circle') {
+              ctx.beginPath()
+              ctx.arc(controlX, controlStartY, control.size / 2, 0, Math.PI * 2)
+              ctx.fillStyle = control.color
+              ctx.fill()
+            } else if (control.type === 'icon') {
+              // Draw Windows-style controls
+              ctx.fillStyle = control.color
+              ctx.font = `${control.size + 2}px Arial`
+              const icons = ['−', '□', '×']
+              ctx.fillText(icons[i] || '−', controlX - 4, controlStartY + 4)
+            }
+          })
+        }
+      }
     }
 
     // Draw the image
-    ctx.drawImage(image, imgX, imgY + browserBarHeight)
+    ctx.drawImage(image, imgX, imgY + themeBarHeight)
     ctx.restore()
 
   }, [image, settings, customRatio])
@@ -455,17 +494,81 @@ function App() {
           </div>
 
           <div className="control-group">
-            <label>Browser Theme</label>
-            <div className="button-group">
-              {(['none', 'light', 'dark'] as const).map(t => (
-                <button
-                  key={t}
-                  className={settings.browserTheme === t ? 'active' : ''}
-                  onClick={() => updateSetting('browserTheme', t)}
-                >
-                  {t}
-                </button>
-              ))}
+            <label>Window Frame</label>
+            <div className="proportion-dropdown" ref={themeDropdownRef}>
+              <button
+                className="proportion-dropdown-trigger"
+                onClick={() => {
+                  setThemeDropdownOpen(!themeDropdownOpen)
+                  if (!themeDropdownOpen) {
+                    setThemeSearch('')
+                    setTimeout(() => themeSearchInputRef.current?.focus(), 0)
+                  }
+                }}
+              >
+                <span className="proportion-selected">
+                  {(() => {
+                    const theme = getThemeById(settings.theme)
+                    const section = getSectionForTheme(settings.theme)
+                    return theme ? (
+                      <>
+                        <span className="proportion-label">{theme.label}</span>
+                        {section && section.id !== 'none' && (
+                          <span className="proportion-section-tag">{section.label}</span>
+                        )}
+                      </>
+                    ) : 'Select...'
+                  })()}
+                </span>
+                <span className={`proportion-arrow ${themeDropdownOpen ? 'open' : ''}`}>▼</span>
+              </button>
+              {themeDropdownOpen && (
+                <div className="proportion-dropdown-menu">
+                  <div className="proportion-search">
+                    <input
+                      ref={themeSearchInputRef}
+                      type="text"
+                      placeholder="Search..."
+                      value={themeSearch}
+                      onChange={(e) => setThemeSearch(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+
+                  {/* Filtered sections */}
+                  {themeSections
+                    .map(section => ({
+                      ...section,
+                      options: section.options.filter(option =>
+                        themeSearch === '' ||
+                        option.label.toLowerCase().includes(themeSearch.toLowerCase()) ||
+                        option.description?.toLowerCase().includes(themeSearch.toLowerCase()) ||
+                        section.label.toLowerCase().includes(themeSearch.toLowerCase())
+                      )
+                    }))
+                    .filter(section => section.options.length > 0)
+                    .map(section => (
+                      <div key={section.id} className="proportion-section">
+                        <div className="proportion-section-header">{section.label}</div>
+                        {section.options.map(option => (
+                          <button
+                            key={option.id}
+                            className={`proportion-option ${settings.theme === option.id ? 'active' : ''}`}
+                            onClick={() => {
+                              updateSetting('theme', option.id)
+                              setThemeDropdownOpen(false)
+                            }}
+                          >
+                            <span className="proportion-option-label">{option.label}</span>
+                            {option.description && (
+                              <span className="proportion-option-desc">{option.description}</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
           </div>
 
