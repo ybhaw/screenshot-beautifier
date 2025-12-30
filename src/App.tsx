@@ -751,6 +751,21 @@ function App() {
           </div>
 
           <div className="control-group">
+            <label>Shadow</label>
+            <div className="button-group">
+              {(['none', 'small', 'medium', 'large'] as const).map(s => (
+                <button
+                  key={s}
+                  className={settings.shadow === s ? 'active' : ''}
+                  onClick={() => updateSetting('shadow', s)}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="control-group">
             <label>Position</label>
             <div className="position-grid">
               {(['top-left', 'top-right', 'center', 'bottom-left', 'bottom-right'] as const).map(pos => (
@@ -761,21 +776,6 @@ function App() {
                   title={pos}
                 >
                   {pos === 'center' ? '●' : '○'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="control-group">
-            <label>Shadow</label>
-            <div className="button-group">
-              {(['none', 'small', 'medium', 'large'] as const).map(s => (
-                <button
-                  key={s}
-                  className={settings.shadow === s ? 'active' : ''}
-                  onClick={() => updateSetting('shadow', s)}
-                >
-                  {s}
                 </button>
               ))}
             </div>
