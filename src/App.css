@@ -2,7 +2,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #0f0f0f;
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
   color: #fff;
 }
 
@@ -18,31 +18,31 @@
 
 .preview-area {
   flex: 1;
-  background: #1a1a1a;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 0;
-  border: 2px dashed #333;
+  border: 2px dashed #ec4899;
   transition: border-color 0.2s, background-color 0.2s;
   overflow: auto;
 }
 
 .preview-area.dragging {
-  border-color: #667eea;
-  background: rgba(102, 126, 234, 0.1);
+  border-color: #22d3ee;
+  background: rgba(34, 211, 238, 0.1);
 }
 
 .drop-zone {
   text-align: center;
-  color: #666;
+  color: #888;
   padding: 1.5rem;
 }
 
 .drop-icon {
   font-size: 4rem;
-  color: #444;
+  color: #ec4899;
   margin-bottom: 1rem;
   line-height: 1;
 }
@@ -54,18 +54,19 @@
 .drop-zone button {
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
   border: none;
   border-radius: 8px;
   color: white;
   font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .drop-zone button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.5);
 }
 
 .canvas-container {
@@ -84,11 +85,12 @@
 .controls {
   width: 320px;
   flex-shrink: 0;
-  background: #1a1a1a;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
   padding: 1.25rem;
   overflow-y: auto;
   max-height: calc(100vh - 2rem);
+  border: 1px solid rgba(236, 72, 153, 0.2);
 }
 
 .controls-header {
@@ -97,29 +99,34 @@
   align-items: center;
   margin-bottom: 1.25rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.3);
 }
 
 .controls-header h2 {
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .reset-btn {
   padding: 0.4rem 0.8rem;
   background: transparent;
-  border: 1px solid #444;
+  border: 1px solid #8b5cf6;
   border-radius: 6px;
-  color: #888;
+  color: #a78bfa;
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .reset-btn:hover {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: #ec4899;
+  color: #ec4899;
+  background: rgba(236, 72, 153, 0.1);
 }
 
 .control-group {
@@ -129,7 +136,7 @@
 .control-group > label {
   display: block;
   font-size: 0.85rem;
-  color: #aaa;
+  color: #a78bfa;
   margin-bottom: 0.5rem;
   font-weight: 500;
 }
@@ -144,10 +151,10 @@
   flex: 1;
   min-width: 60px;
   padding: 0.5rem 0.75rem;
-  background: #252525;
-  border: 1px solid #333;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: 6px;
-  color: #888;
+  color: #c4b5fd;
   font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.2s;
@@ -155,12 +162,13 @@
 }
 
 .button-group button:hover {
-  border-color: #555;
-  color: #ccc;
+  border-color: #ec4899;
+  color: #f472b6;
+  background: rgba(236, 72, 153, 0.1);
 }
 
 .button-group button.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
   border-color: transparent;
   color: white;
 }
@@ -174,10 +182,10 @@
 .color-inputs input[type="color"] {
   width: 50px;
   height: 36px;
-  border: none;
+  border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: 6px;
   cursor: pointer;
-  background: #252525;
+  background: rgba(139, 92, 246, 0.1);
   padding: 2px;
 }
 
@@ -194,7 +202,7 @@
   flex: 1;
   height: 6px;
   border-radius: 3px;
-  background: #333;
+  background: rgba(139, 92, 246, 0.3);
   -webkit-appearance: none;
   appearance: none;
 }
@@ -205,7 +213,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
   cursor: pointer;
 }
 
@@ -218,10 +226,10 @@
 
 .position-btn {
   aspect-ratio: 1;
-  background: #252525;
-  border: 1px solid #333;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: 6px;
-  color: #666;
+  color: #a78bfa;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s;
@@ -256,19 +264,20 @@
 }
 
 .position-btn:hover {
-  border-color: #555;
-  color: #999;
+  border-color: #ec4899;
+  color: #f472b6;
+  background: rgba(236, 72, 153, 0.1);
 }
 
 .position-btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
   border-color: transparent;
   color: white;
 }
 
 .control-group label input[type="checkbox"] {
   margin-right: 0.5rem;
-  accent-color: #667eea;
+  accent-color: #ec4899;
 }
 
 .export-buttons {
@@ -277,13 +286,13 @@
   gap: 0.75rem;
   margin-top: 1.5rem;
   padding-top: 1.25rem;
-  border-top: 1px solid #333;
+  border-top: 1px solid rgba(139, 92, 246, 0.3);
 }
 
 .export-buttons button.primary {
   width: 100%;
   padding: 0.75rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
   border: none;
   border-radius: 8px;
   color: white;
@@ -295,7 +304,7 @@
 
 .export-buttons button.primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.5);
 }
 
 /* Scrollbar styling */
@@ -308,12 +317,12 @@
 }
 
 .controls::-webkit-scrollbar-thumb {
-  background: #333;
+  background: #8b5cf6;
   border-radius: 3px;
 }
 
 .controls::-webkit-scrollbar-thumb:hover {
-  background: #444;
+  background: #ec4899;
 }
 
 /* Responsive */
