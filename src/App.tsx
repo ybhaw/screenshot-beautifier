@@ -12,7 +12,6 @@ interface Settings {
   bgColor1: string
   bgColor2: string
   gradientAngle: number
-  outerRadius: 'none' | 'small' | 'medium' | 'large'
   innerRadius: 'none' | 'small' | 'medium' | 'large'
   position: 'center' | 'top-left' | 'top' | 'top-right' | 'left' | 'right' | 'bottom-left' | 'bottom' | 'bottom-right'
   shadow: 'none' | 'small' | 'medium' | 'large'
@@ -28,7 +27,6 @@ const defaultSettings: Settings = {
   bgColor1: '#ec4899',
   bgColor2: '#8b5cf6',
   gradientAngle: 135,
-  outerRadius: 'medium',
   innerRadius: 'small',
   position: 'center',
   shadow: 'medium',
@@ -339,14 +337,13 @@ function App() {
       ctx.save()
       ctx.strokeStyle = settings.bgColor2
       ctx.lineWidth = imageBorderWidth
-      const outerRadius = radiusValues[settings.outerRadius]
       ctx.beginPath()
       ctx.roundRect(
         imageBorderWidth / 2,
         imageBorderWidth / 2,
         canvasWidth - imageBorderWidth,
         canvasHeight - imageBorderWidth,
-        Math.max(0, outerRadius - imageBorderWidth / 2)
+        Math.max(0, innerRadius - imageBorderWidth / 2)
       )
       ctx.stroke()
       ctx.restore()
@@ -917,22 +914,7 @@ function App() {
           </div>
 
           <div className="control-group">
-            <label>Corner Radius (Outer)</label>
-            <div className="button-group">
-              {(['none', 'small', 'medium', 'large'] as const).map(r => (
-                <button
-                  key={r}
-                  className={settings.outerRadius === r ? 'active' : ''}
-                  onClick={() => updateSetting('outerRadius', r)}
-                >
-                  {r}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="control-group">
-            <label>Corner Radius (Inner)</label>
+            <label>Corner Radius</label>
             <div className="button-group">
               {(['none', 'small', 'medium', 'large'] as const).map(r => (
                 <button
