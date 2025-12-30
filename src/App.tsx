@@ -46,6 +46,8 @@ function App() {
   const [backgroundDropdownOpen, setBackgroundDropdownOpen] = useState(false)
   const [backgroundSearch, setBackgroundSearch] = useState('')
   const [customRatio, setCustomRatio] = useState({ width: 16, height: 9 })
+  const [sidebarWidth, setSidebarWidth] = useState(320)
+  const [isResizing, setIsResizing] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const proportionDropdownRef = useRef<HTMLDivElement>(null)
@@ -302,6 +304,30 @@ function App() {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [image])
 
+  // Sidebar resize
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return
+      const newWidth = window.innerWidth - e.clientX
+      setSidebarWidth(Math.max(newWidth, 250))
+    }
+    const handleMouseUp = () => setIsResizing(false)
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      document.body.style.cursor = 'ew-resize'
+      document.body.style.userSelect = 'none'
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+  }, [isResizing])
+
   const copyToClipboard = async () => {
     if (!canvasRef.current) return
     try {
@@ -360,7 +386,11 @@ function App() {
           )}
         </div>
 
-        <div className="controls">
+        <div className="controls" style={{ width: sidebarWidth }}>
+          <div
+            className="resize-handle"
+            onMouseDown={() => setIsResizing(true)}
+          />
           <div className="controls-header">
             <h2>Settings</h2>
             <button className="reset-btn" onClick={reset}>Reset</button>
