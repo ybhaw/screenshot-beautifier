@@ -38,9 +38,12 @@ function App() {
   const [settings, setSettings] = useState<Settings>(defaultSettings)
   const [isDragging, setIsDragging] = useState(false)
   const [proportionDropdownOpen, setProportionDropdownOpen] = useState(false)
+  const [proportionSearch, setProportionSearch] = useState('')
+  const [customRatio, setCustomRatio] = useState({ width: 16, height: 9 })
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const proportionDropdownRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   const updateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
     setSettings(prev => ({ ...prev, [key]: value }))
@@ -121,9 +124,11 @@ function App() {
     const imgHeight = image.height + browserBarHeight
 
     const proportionConfig = getProportionById(settings.proportion)
-    const ratio = proportionConfig?.ratio
+    const ratio = settings.proportion === 'custom'
+      ? customRatio.width / customRatio.height
+      : proportionConfig?.ratio
 
-    if (ratio === null || ratio === undefined) {
+    if (settings.proportion !== 'custom' && (ratio === null || ratio === undefined)) {
       // Auto mode - fit to image
       if (settings.position === 'center') {
         canvasWidth = imgWidth + padding * 2
@@ -136,7 +141,7 @@ function App() {
     } else if (ratio === 1) {
       // Square
       canvasWidth = canvasHeight = Math.max(imgWidth, imgHeight) + padding * 2
-    } else {
+    } else if (ratio) {
       // Custom aspect ratio
       canvasWidth = imgWidth + padding * 2
       canvasHeight = canvasWidth / ratio
@@ -144,6 +149,10 @@ function App() {
         canvasHeight = imgHeight + padding * 2
         canvasWidth = canvasHeight * ratio
       }
+    } else {
+      // Fallback to auto
+      canvasWidth = imgWidth + padding * 2
+      canvasHeight = imgHeight + padding * 2
     }
 
     canvas.width = canvasWidth
@@ -241,7 +250,7 @@ function App() {
     ctx.drawImage(image, imgX, imgY + browserBarHeight)
     ctx.restore()
 
-  }, [image, settings])
+  }, [image, settings, customRatio])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -328,10 +337,24 @@ function App() {
             <div className="proportion-dropdown" ref={proportionDropdownRef}>
               <button
                 className="proportion-dropdown-trigger"
-                onClick={() => setProportionDropdownOpen(!proportionDropdownOpen)}
+                onClick={() => {
+                  setProportionDropdownOpen(!proportionDropdownOpen)
+                  if (!proportionDropdownOpen) {
+                    setProportionSearch('')
+                    setTimeout(() => searchInputRef.current?.focus(), 0)
+                  }
+                }}
               >
                 <span className="proportion-selected">
                   {(() => {
+                    if (settings.proportion === 'custom') {
+                      return (
+                        <>
+                          <span className="proportion-label">{customRatio.width}:{customRatio.height}</span>
+                          <span className="proportion-section-tag">Custom</span>
+                        </>
+                      )
+                    }
                     const prop = getProportionById(settings.proportion)
                     const section = getSectionForProportion(settings.proportion)
                     return prop ? (
@@ -348,26 +371,84 @@ function App() {
               </button>
               {proportionDropdownOpen && (
                 <div className="proportion-dropdown-menu">
-                  {proportionSections.map(section => (
-                    <div key={section.id} className="proportion-section">
-                      <div className="proportion-section-header">{section.label}</div>
-                      {section.options.map(option => (
+                  <div className="proportion-search">
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      placeholder="Search..."
+                      value={proportionSearch}
+                      onChange={(e) => setProportionSearch(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+
+                  {/* Custom ratio section */}
+                  {(proportionSearch === '' || 'custom'.includes(proportionSearch.toLowerCase())) && (
+                    <div className="proportion-section">
+                      <div className="proportion-section-header">Custom</div>
+                      <div className="proportion-custom">
+                        <input
+                          type="number"
+                          min="1"
+                          max="9999"
+                          value={customRatio.width}
+                          onChange={(e) => setCustomRatio(prev => ({ ...prev, width: Math.max(1, parseInt(e.target.value) || 1) }))}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <span>:</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="9999"
+                          value={customRatio.height}
+                          onChange={(e) => setCustomRatio(prev => ({ ...prev, height: Math.max(1, parseInt(e.target.value) || 1) }))}
+                          onClick={(e) => e.stopPropagation()}
+                        />
                         <button
-                          key={option.id}
-                          className={`proportion-option ${settings.proportion === option.id ? 'active' : ''}`}
+                          className={`proportion-custom-apply ${settings.proportion === 'custom' ? 'active' : ''}`}
                           onClick={() => {
-                            updateSetting('proportion', option.id)
+                            updateSetting('proportion', 'custom')
                             setProportionDropdownOpen(false)
                           }}
                         >
-                          <span className="proportion-option-label">{option.label}</span>
-                          {option.description && (
-                            <span className="proportion-option-desc">{option.description}</span>
-                          )}
+                          Apply
                         </button>
-                      ))}
+                      </div>
                     </div>
-                  ))}
+                  )}
+
+                  {/* Filtered sections */}
+                  {proportionSections
+                    .map(section => ({
+                      ...section,
+                      options: section.options.filter(option =>
+                        proportionSearch === '' ||
+                        option.label.toLowerCase().includes(proportionSearch.toLowerCase()) ||
+                        option.description?.toLowerCase().includes(proportionSearch.toLowerCase()) ||
+                        section.label.toLowerCase().includes(proportionSearch.toLowerCase())
+                      )
+                    }))
+                    .filter(section => section.options.length > 0)
+                    .map(section => (
+                      <div key={section.id} className="proportion-section">
+                        <div className="proportion-section-header">{section.label}</div>
+                        {section.options.map(option => (
+                          <button
+                            key={option.id}
+                            className={`proportion-option ${settings.proportion === option.id ? 'active' : ''}`}
+                            onClick={() => {
+                              updateSetting('proportion', option.id)
+                              setProportionDropdownOpen(false)
+                            }}
+                          >
+                            <span className="proportion-option-label">{option.label}</span>
+                            {option.description && (
+                              <span className="proportion-option-desc">{option.description}</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    ))}
                 </div>
               )}
             </div>
