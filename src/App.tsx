@@ -1,12 +1,23 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import './App.css'
-import { proportionSections, getProportionById, getSectionForProportion } from './proportions.config'
+import {
+  proportionSections,
+  getProportionById,
+  getSectionForProportion,
+} from './proportions.config'
 import { themeSections, getThemeById, getSectionForTheme } from './theme.config'
 import { backgroundSections, getBackgroundById, getSectionForBackground } from './background.config'
 import type { BackgroundOption } from './background.config'
 import { defaultSettings, paddingValues, radiusValues, borderWidthValues } from './types'
 import type { Settings, SizePreset, ZoomOption } from './types'
-import { Dropdown, ButtonGroup, PositionGrid, ZoomControl, DropZone, ToastContainer } from './components'
+import {
+  Dropdown,
+  ButtonGroup,
+  PositionGrid,
+  ZoomControl,
+  DropZone,
+  ToastContainer,
+} from './components'
 import { useImageLoader } from './hooks/useImageLoader'
 
 const sizePresets: readonly SizePreset[] = ['none', 'small', 'medium', 'large'] as const
@@ -23,25 +34,27 @@ function App() {
   const [sidebarWidth, setSidebarWidth] = useState(320)
   const [isResizing, setIsResizing] = useState(false)
   const [zoomLevel, setZoomLevel] = useState<ZoomOption['id']>('fit')
-  const [canvasReady, setCanvasReady] = useState(0)
   const [toasts, setToasts] = useState<ToastItem[]>([])
+  const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 })
+  const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 })
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const previewAreaRef = useRef<HTMLDivElement>(null)
 
-  const { image, isDragging, loadImage, handleDrop, handleDragOver, handleDragLeave } = useImageLoader()
+  const { image, isDragging, loadImage, handleDrop, handleDragOver, handleDragLeave } =
+    useImageLoader()
 
   const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
     const id = Date.now()
-    setToasts(prev => [...prev, { id, message, type }])
+    setToasts((prev) => [...prev, { id, message, type }])
   }, [])
 
   const removeToast = useCallback((id: number) => {
-    setToasts(prev => prev.filter(t => t.id !== id))
+    setToasts((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
   const updateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
-    setSettings(prev => ({ ...prev, [key]: value }))
+    setSettings((prev) => ({ ...prev, [key]: value }))
   }
 
   // Canvas rendering
@@ -64,9 +77,10 @@ function App() {
     const imgHeight = image.height + themeBarHeight
 
     const proportionConfig = getProportionById(settings.proportion)
-    const ratio = settings.proportion === 'custom'
-      ? customRatio.width / customRatio.height
-      : proportionConfig?.ratio
+    const ratio =
+      settings.proportion === 'custom'
+        ? customRatio.width / customRatio.height
+        : proportionConfig?.ratio
 
     if (settings.proportion !== 'custom' && (ratio === null || ratio === undefined)) {
       if (settings.position === 'center') {
@@ -110,23 +124,40 @@ function App() {
     let imgY: number
     switch (settings.position) {
       case 'top-left':
-        imgX = padding; imgY = padding; break
+        imgX = padding
+        imgY = padding
+        break
       case 'top':
-        imgX = (canvasWidth - imgWidth) / 2; imgY = padding; break
+        imgX = (canvasWidth - imgWidth) / 2
+        imgY = padding
+        break
       case 'top-right':
-        imgX = canvasWidth - imgWidth - padding; imgY = padding; break
+        imgX = canvasWidth - imgWidth - padding
+        imgY = padding
+        break
       case 'left':
-        imgX = padding; imgY = (canvasHeight - imgHeight) / 2; break
+        imgX = padding
+        imgY = (canvasHeight - imgHeight) / 2
+        break
       case 'right':
-        imgX = canvasWidth - imgWidth - padding; imgY = (canvasHeight - imgHeight) / 2; break
+        imgX = canvasWidth - imgWidth - padding
+        imgY = (canvasHeight - imgHeight) / 2
+        break
       case 'bottom-left':
-        imgX = padding; imgY = canvasHeight - imgHeight - padding; break
+        imgX = padding
+        imgY = canvasHeight - imgHeight - padding
+        break
       case 'bottom':
-        imgX = (canvasWidth - imgWidth) / 2; imgY = canvasHeight - imgHeight - padding; break
+        imgX = (canvasWidth - imgWidth) / 2
+        imgY = canvasHeight - imgHeight - padding
+        break
       case 'bottom-right':
-        imgX = canvasWidth - imgWidth - padding; imgY = canvasHeight - imgHeight - padding; break
+        imgX = canvasWidth - imgWidth - padding
+        imgY = canvasHeight - imgHeight - padding
+        break
       default:
-        imgX = (canvasWidth - imgWidth) / 2; imgY = (canvasHeight - imgHeight) / 2
+        imgX = (canvasWidth - imgWidth) / 2
+        imgY = (canvasHeight - imgHeight) / 2
     }
 
     // Draw shadow
@@ -174,7 +205,8 @@ function App() {
           })
         } else {
           themeConfig.controls.forEach((control, i) => {
-            const controlX = imgX + imgWidth - 20 - (themeConfig.controls.length - 1 - i) * (controlSpacing + 26)
+            const controlX =
+              imgX + imgWidth - 20 - (themeConfig.controls.length - 1 - i) * (controlSpacing + 26)
             if (control.type === 'circle') {
               ctx.beginPath()
               ctx.arc(controlX, controlStartY, control.size / 2, 0, Math.PI * 2)
@@ -231,8 +263,39 @@ function App() {
       ctx.restore()
     }
 
-    setCanvasReady(prev => prev + 1)
+    // Update canvas dimensions after render
+    requestAnimationFrame(() => {
+      setCanvasDimensions({ width: canvasWidth, height: canvasHeight })
+      if (previewAreaRef.current) {
+        setContainerDimensions({
+          width: previewAreaRef.current.clientWidth - 32,
+          height: previewAreaRef.current.clientHeight - 32,
+        })
+      }
+    })
   }, [image, settings, customRatio])
+
+  const copyToClipboard = useCallback(async () => {
+    if (!canvasRef.current) return
+    try {
+      const blob = await new Promise<Blob>((resolve) =>
+        canvasRef.current!.toBlob((b) => resolve(b!), 'image/png')
+      )
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+      showToast('Copied to clipboard')
+    } catch {
+      showToast('Failed to copy', 'error')
+    }
+  }, [showToast])
+
+  const saveImage = useCallback(() => {
+    if (!canvasRef.current) return
+    const link = document.createElement('a')
+    link.download = 'beautified-screenshot.png'
+    link.href = canvasRef.current.toDataURL('image/png')
+    link.click()
+    showToast('Image saved')
+  }, [showToast])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -248,11 +311,18 @@ function App() {
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [image])
+  }, [image, copyToClipboard, saveImage])
 
   // Window resize
   useEffect(() => {
-    const handleResize = () => setCanvasReady(prev => prev + 1)
+    const handleResize = () => {
+      if (previewAreaRef.current) {
+        setContainerDimensions({
+          width: previewAreaRef.current.clientWidth - 32,
+          height: previewAreaRef.current.clientHeight - 32,
+        })
+      }
+    }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
@@ -263,7 +333,12 @@ function App() {
       if (!isResizing) return
       const newWidth = window.innerWidth - e.clientX
       setSidebarWidth(Math.max(newWidth, 250))
-      setCanvasReady(prev => prev + 1)
+      if (previewAreaRef.current) {
+        setContainerDimensions({
+          width: previewAreaRef.current.clientWidth - 32,
+          height: previewAreaRef.current.clientHeight - 32,
+        })
+      }
     }
     const handleMouseUp = () => setIsResizing(false)
 
@@ -282,51 +357,26 @@ function App() {
     }
   }, [isResizing])
 
-  const copyToClipboard = async () => {
-    if (!canvasRef.current) return
-    try {
-      const blob = await new Promise<Blob>((resolve) =>
-        canvasRef.current!.toBlob((b) => resolve(b!), 'image/png')
-      )
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': blob })
-      ])
-      showToast('Copied to clipboard')
-    } catch {
-      showToast('Failed to copy', 'error')
-    }
-  }
-
-  const saveImage = () => {
-    if (!canvasRef.current) return
-    const link = document.createElement('a')
-    link.download = 'beautified-screenshot.png'
-    link.href = canvasRef.current.toDataURL('image/png')
-    link.click()
-    showToast('Image saved')
-  }
-
   const reset = () => setSettings(defaultSettings)
 
-  const getZoomStyle = (): React.CSSProperties => {
-    void canvasReady
-    const canvas = canvasRef.current
-    const previewArea = previewAreaRef.current
-
-    if (!canvas || !previewArea || canvas.width === 0 || canvas.height === 0) {
+  const zoomStyle = useMemo((): React.CSSProperties => {
+    if (canvasDimensions.width === 0 || canvasDimensions.height === 0) {
       return {}
     }
 
-    const containerWidth = previewArea.clientWidth - 32
-    const containerHeight = previewArea.clientHeight - 32
+    const { width: containerWidth, height: containerHeight } = containerDimensions
 
     switch (zoomLevel) {
       case 'fit': {
-        const scaleX = containerWidth / canvas.width
-        const scaleY = containerHeight / canvas.height
+        const scaleX = containerWidth / canvasDimensions.width
+        const scaleY = containerHeight / canvasDimensions.height
         const scale = Math.min(scaleX, scaleY, 1)
         if (scale < 1) {
-          return { maxWidth: 'none', transform: `scale(${scale})`, transformOrigin: 'center center' }
+          return {
+            maxWidth: 'none',
+            transform: `scale(${scale})`,
+            transformOrigin: 'center center',
+          }
         }
         return { maxWidth: 'none', transform: 'none' }
       }
@@ -337,13 +387,13 @@ function App() {
       case '200':
         return { maxWidth: 'none', transform: 'scale(2)', transformOrigin: 'top left' }
       case 'match-width': {
-        const scale = containerWidth / canvas.width
+        const scale = containerWidth / canvasDimensions.width
         return { maxWidth: 'none', transform: `scale(${scale})`, transformOrigin: 'top left' }
       }
       default:
         return {}
     }
-  }
+  }, [zoomLevel, canvasDimensions, containerDimensions])
 
   return (
     <div className="app">
@@ -360,8 +410,10 @@ function App() {
             <DropZone onFileSelect={loadImage} />
           ) : (
             <>
-              <div className={`canvas-container ${zoomLevel === 'fit' ? 'zoom-fit' : 'zoom-active'}`}>
-                <canvas ref={canvasRef} style={getZoomStyle()} />
+              <div
+                className={`canvas-container ${zoomLevel === 'fit' ? 'zoom-fit' : 'zoom-active'}`}
+              >
+                <canvas ref={canvasRef} style={zoomStyle} />
               </div>
               <ZoomControl value={zoomLevel} onChange={setZoomLevel} />
             </>
@@ -373,7 +425,9 @@ function App() {
           <div className="controls">
             <div className="controls-header">
               <h2>Settings</h2>
-              <button className="reset-btn" onClick={reset}>Reset</button>
+              <button className="reset-btn" onClick={reset}>
+                Reset
+              </button>
             </div>
 
             {/* Proportion */}
@@ -387,7 +441,9 @@ function App() {
                   if (settings.proportion === 'custom') {
                     return (
                       <>
-                        <span className="proportion-label">{customRatio.width}:{customRatio.height}</span>
+                        <span className="proportion-label">
+                          {customRatio.width}:{customRatio.height}
+                        </span>
                         <span className="proportion-section-tag">Custom</span>
                       </>
                     )
@@ -401,7 +457,9 @@ function App() {
                         <span className="proportion-section-tag">{section.label}</span>
                       )}
                     </>
-                  ) : 'Select...'
+                  ) : (
+                    'Select...'
+                  )
                 }}
                 customSection={
                   <div className="proportion-section">
@@ -412,7 +470,12 @@ function App() {
                         min="1"
                         max="9999"
                         value={customRatio.width}
-                        onChange={(e) => setCustomRatio(prev => ({ ...prev, width: Math.max(1, parseInt(e.target.value) || 1) }))}
+                        onChange={(e) =>
+                          setCustomRatio((prev) => ({
+                            ...prev,
+                            width: Math.max(1, parseInt(e.target.value) || 1),
+                          }))
+                        }
                         onClick={(e) => e.stopPropagation()}
                       />
                       <span>:</span>
@@ -421,7 +484,12 @@ function App() {
                         min="1"
                         max="9999"
                         value={customRatio.height}
-                        onChange={(e) => setCustomRatio(prev => ({ ...prev, height: Math.max(1, parseInt(e.target.value) || 1) }))}
+                        onChange={(e) =>
+                          setCustomRatio((prev) => ({
+                            ...prev,
+                            height: Math.max(1, parseInt(e.target.value) || 1),
+                          }))
+                        }
                         onClick={(e) => e.stopPropagation()}
                       />
                       <button
@@ -453,7 +521,9 @@ function App() {
                         <span className="proportion-section-tag">{section.label}</span>
                       )}
                     </>
-                  ) : 'Select...'
+                  ) : (
+                    'Select...'
+                  )
                 }}
               />
             </div>
@@ -487,8 +557,14 @@ function App() {
                       <>
                         <span className="proportion-label">Custom</span>
                         <span className="background-preview-colors">
-                          <span className="color-dot" style={{ background: settings.bgColor1 }}></span>
-                          <span className="color-dot" style={{ background: settings.bgColor2 }}></span>
+                          <span
+                            className="color-dot"
+                            style={{ background: settings.bgColor1 }}
+                          ></span>
+                          <span
+                            className="color-dot"
+                            style={{ background: settings.bgColor2 }}
+                          ></span>
                         </span>
                       </>
                     )
@@ -500,7 +576,9 @@ function App() {
                       <span className="proportion-label">{bg.label}</span>
                       {section && <span className="proportion-section-tag">{section.label}</span>}
                     </>
-                  ) : 'Select...'
+                  ) : (
+                    'Select...'
+                  )
                 }}
                 renderOption={(option) => {
                   const bgOption = option as BackgroundOption
@@ -509,7 +587,7 @@ function App() {
                       <span
                         className="background-option-preview"
                         style={{
-                          background: `linear-gradient(${bgOption.gradientAngle}deg, ${bgOption.bgColor1}, ${bgOption.bgColor2})`
+                          background: `linear-gradient(${bgOption.gradientAngle}deg, ${bgOption.bgColor1}, ${bgOption.bgColor2})`,
                         }}
                       ></span>
                       <span className="proportion-option-label">{option.label}</span>

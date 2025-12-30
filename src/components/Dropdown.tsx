@@ -64,27 +64,23 @@ export function Dropdown<T extends { id: string; label: string; description?: st
   const filter = filterFn || defaultFilterFn
 
   const filteredSections = sections
-    .map(section => ({
+    .map((section) => ({
       ...section,
-      options: section.options.filter(option => filter(option, section, search))
+      options: section.options.filter((option) => filter(option, section, search)),
     }))
-    .filter(section => section.options.length > 0)
+    .filter((section) => section.options.length > 0)
 
-  const defaultRenderOption = (option: T, _isActive: boolean) => (
+  const defaultRenderOption = (option: T) => (
     <>
       <span className="proportion-option-label">{option.label}</span>
-      {option.description && (
-        <span className="proportion-option-desc">{option.description}</span>
-      )}
+      {option.description && <span className="proportion-option-desc">{option.description}</span>}
     </>
   )
 
   return (
     <div className="proportion-dropdown" ref={dropdownRef}>
       <button className="proportion-dropdown-trigger" onClick={handleToggle}>
-        <span className="proportion-selected">
-          {getSelectedDisplay()}
-        </span>
+        <span className="proportion-selected">{getSelectedDisplay()}</span>
         <span className={`proportion-arrow ${isOpen ? 'open' : ''}`}>&#9660;</span>
       </button>
       {isOpen && (
@@ -100,12 +96,14 @@ export function Dropdown<T extends { id: string; label: string; description?: st
             />
           </div>
 
-          {customSection && (search === '' || 'custom'.includes(search.toLowerCase())) && customSection}
+          {customSection &&
+            (search === '' || 'custom'.includes(search.toLowerCase())) &&
+            customSection}
 
-          {filteredSections.map(section => (
+          {filteredSections.map((section) => (
             <div key={section.id} className="proportion-section">
               <div className="proportion-section-header">{section.label}</div>
-              {section.options.map(option => (
+              {section.options.map((option) => (
                 <button
                   key={option.id}
                   className={`proportion-option ${value === option.id ? 'active' : ''}`}
@@ -114,7 +112,9 @@ export function Dropdown<T extends { id: string; label: string; description?: st
                     setIsOpen(false)
                   }}
                 >
-                  {renderOption ? renderOption(option, value === option.id) : defaultRenderOption(option, value === option.id)}
+                  {renderOption
+                    ? renderOption(option, value === option.id)
+                    : defaultRenderOption(option)}
                 </button>
               ))}
             </div>

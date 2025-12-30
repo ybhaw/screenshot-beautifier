@@ -1,9 +1,15 @@
 import type { Position } from '../types'
 
 const positions: readonly Position[] = [
-  'top-left', 'top', 'top-right',
-  'left', 'center', 'right',
-  'bottom-left', 'bottom', 'bottom-right'
+  'top-left',
+  'top',
+  'top-right',
+  'left',
+  'center',
+  'right',
+  'bottom-left',
+  'bottom',
+  'bottom-right',
 ] as const
 
 interface PositionGridProps {
@@ -14,7 +20,7 @@ interface PositionGridProps {
 export function PositionGrid({ value, onChange }: PositionGridProps) {
   return (
     <div className="position-grid">
-      {positions.map(pos => (
+      {positions.map((pos) => (
         <button
           key={pos}
           className={`position-btn ${value === pos ? 'active' : ''}`}

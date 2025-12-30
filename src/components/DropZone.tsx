@@ -18,16 +18,8 @@ export function DropZone({ onFileSelect }: DropZoneProps) {
     <div className="drop-zone">
       <div className="drop-icon">+</div>
       <p>Paste (Cmd/Ctrl+V), drag & drop, or</p>
-      <button onClick={() => fileInputRef.current?.click()}>
-        Upload Image
-      </button>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        hidden
-      />
+      <button onClick={() => fileInputRef.current?.click()}>Upload Image</button>
+      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} hidden />
     </div>
   )
 }

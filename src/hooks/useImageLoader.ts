@@ -16,26 +16,32 @@ export function useImageLoader() {
     reader.readAsDataURL(file)
   }, [])
 
-  const handlePaste = useCallback((e: ClipboardEvent) => {
-    const items = e.clipboardData?.items
-    if (!items) return
-    for (const item of items) {
-      if (item.type.startsWith('image/')) {
-        const file = item.getAsFile()
-        if (file) loadImage(file)
-        break
+  const handlePaste = useCallback(
+    (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items
+      if (!items) return
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile()
+          if (file) loadImage(file)
+          break
+        }
       }
-    }
-  }, [loadImage])
+    },
+    [loadImage]
+  )
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    const file = e.dataTransfer.files[0]
-    if (file?.type.startsWith('image/')) {
-      loadImage(file)
-    }
-  }, [loadImage])
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      setIsDragging(false)
+      const file = e.dataTransfer.files[0]
+      if (file?.type.startsWith('image/')) {
+        loadImage(file)
+      }
+    },
+    [loadImage]
+  )
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()

@@ -13,7 +13,7 @@ export function ButtonGroup<T extends string>({
 }: ButtonGroupProps<T>) {
   return (
     <div className="button-group">
-      {options.map(option => (
+      {options.map((option) => (
         <button
           key={option}
           className={value === option ? 'active' : ''}

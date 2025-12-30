@@ -21,16 +21,20 @@ export function ZoomControl({ value, onChange }: ZoomControlProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const currentOption = zoomOptions.find(z => z.id === value)
+  const currentOption = zoomOptions.find((z) => z.id === value)
 
   return (
     <div className="zoom-overlay" ref={dropdownRef}>
-      <button
-        className="zoom-trigger"
-        onClick={() => setIsOpen(!isOpen)}
-      >
+      <button className="zoom-trigger" onClick={() => setIsOpen(!isOpen)}>
         <span className="zoom-icon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
           </svg>
@@ -40,7 +44,7 @@ export function ZoomControl({ value, onChange }: ZoomControlProps) {
       </button>
       {isOpen && (
         <div className="zoom-dropdown-menu">
-          {zoomOptions.map(option => (
+          {zoomOptions.map((option) => (
             <button
               key={option.id}
               className={`zoom-option ${value === option.id ? 'active' : ''}`}

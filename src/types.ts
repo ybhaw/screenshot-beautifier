@@ -7,7 +7,16 @@ export interface Settings {
   bgColor2: string
   gradientAngle: number
   innerRadius: 'none' | 'small' | 'medium' | 'large'
-  position: 'center' | 'top-left' | 'top' | 'top-right' | 'left' | 'right' | 'bottom-left' | 'bottom' | 'bottom-right'
+  position:
+    | 'center'
+    | 'top-left'
+    | 'top'
+    | 'top-right'
+    | 'left'
+    | 'right'
+    | 'bottom-left'
+    | 'bottom'
+    | 'bottom-right'
   shadow: 'none' | 'small' | 'medium' | 'large'
   screenshotBorder: 'none' | 'small' | 'medium' | 'large'
   imageBorder: 'none' | 'small' | 'medium' | 'large'
@@ -49,9 +58,19 @@ export const defaultSettings: Settings = {
   imageBorder: 'none',
 }
 
-export const paddingValues: Record<SizePreset, number> = { none: 0, small: 40, medium: 80, large: 120 }
+export const paddingValues: Record<SizePreset, number> = {
+  none: 0,
+  small: 40,
+  medium: 80,
+  large: 120,
+}
 export const radiusValues: Record<SizePreset, number> = { none: 0, small: 8, medium: 16, large: 24 }
-export const borderWidthValues: Record<SizePreset, number> = { none: 0, small: 2, medium: 4, large: 6 }
+export const borderWidthValues: Record<SizePreset, number> = {
+  none: 0,
+  small: 2,
+  medium: 4,
+  large: 6,
+}
 
 export const zoomOptions: ZoomOption[] = [
   { id: 'fit', label: 'Fit', description: 'Shrink to fit' },
