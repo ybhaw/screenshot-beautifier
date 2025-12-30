@@ -48,7 +48,12 @@ function App() {
   const [customRatio, setCustomRatio] = useState({ width: 16, height: 9 })
   const [sidebarWidth, setSidebarWidth] = useState(320)
   const [isResizing, setIsResizing] = useState(false)
+  const [zoomLevel, setZoomLevel] = useState<'fit' | '50' | '100' | '200' | 'match-width'>('fit')
+  const [zoomDropdownOpen, setZoomDropdownOpen] = useState(false)
+  const [canvasReady, setCanvasReady] = useState(0) // Used to trigger re-render when canvas is drawn
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const zoomDropdownRef = useRef<HTMLDivElement>(null)
+  const previewAreaRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const proportionDropdownRef = useRef<HTMLDivElement>(null)
   const themeDropdownRef = useRef<HTMLDivElement>(null)
@@ -117,6 +122,9 @@ function App() {
       }
       if (backgroundDropdownRef.current && !backgroundDropdownRef.current.contains(e.target as Node)) {
         setBackgroundDropdownOpen(false)
+      }
+      if (zoomDropdownRef.current && !zoomDropdownRef.current.contains(e.target as Node)) {
+        setZoomDropdownOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -302,6 +310,9 @@ function App() {
     ctx.drawImage(image, imgX, imgY + themeBarHeight)
     ctx.restore()
 
+    // Trigger zoom recalculation
+    setCanvasReady(prev => prev + 1)
+
   }, [image, settings, customRatio])
 
   // Keyboard shortcuts
@@ -320,12 +331,20 @@ function App() {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [image])
 
+  // Window resize - recalculate zoom
+  useEffect(() => {
+    const handleResize = () => setCanvasReady(prev => prev + 1)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   // Sidebar resize
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isResizing) return
       const newWidth = window.innerWidth - e.clientX
       setSidebarWidth(Math.max(newWidth, 250))
+      setCanvasReady(prev => prev + 1) // Recalculate zoom
     }
     const handleMouseUp = () => setIsResizing(false)
 
@@ -371,10 +390,62 @@ function App() {
     setSettings(defaultSettings)
   }
 
+  const getZoomStyle = (): React.CSSProperties => {
+    // canvasReady is used to trigger re-renders when canvas/container size changes
+    void canvasReady
+
+    const canvas = canvasRef.current
+    const previewArea = previewAreaRef.current
+
+    if (!canvas || !previewArea || canvas.width === 0 || canvas.height === 0) {
+      return {}
+    }
+
+    const containerWidth = previewArea.clientWidth - 32
+    const containerHeight = previewArea.clientHeight - 32
+
+    switch (zoomLevel) {
+      case 'fit': {
+        // Calculate scale to fit both width and height
+        const scaleX = containerWidth / canvas.width
+        const scaleY = containerHeight / canvas.height
+        const scale = Math.min(scaleX, scaleY, 1) // Don't scale up, only down
+        if (scale < 1) {
+          return { maxWidth: 'none', transform: `scale(${scale})`, transformOrigin: 'top left' }
+        }
+        return { maxWidth: 'none', transform: 'none' }
+      }
+      case '50': {
+        return { maxWidth: 'none', transform: 'scale(0.5)', transformOrigin: 'top left' }
+      }
+      case '100': {
+        return { maxWidth: 'none', transform: 'none' }
+      }
+      case '200': {
+        return { maxWidth: 'none', transform: 'scale(2)', transformOrigin: 'top left' }
+      }
+      case 'match-width': {
+        const scale = containerWidth / canvas.width
+        return { maxWidth: 'none', transform: `scale(${scale})`, transformOrigin: 'top left' }
+      }
+      default:
+        return {}
+    }
+  }
+
+  const zoomOptions = [
+    { id: 'fit' as const, label: 'Fit', description: 'Shrink to fit' },
+    { id: '50' as const, label: '50%', description: 'Half size' },
+    { id: '100' as const, label: '100%', description: 'Actual size' },
+    { id: '200' as const, label: '200%', description: 'Double size' },
+    { id: 'match-width' as const, label: 'Match Width', description: 'Fill width' },
+  ]
+
   return (
     <div className="app">
       <div className="main-content">
         <div
+          ref={previewAreaRef}
           className={`preview-area ${isDragging ? 'dragging' : ''}`}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -396,9 +467,45 @@ function App() {
               />
             </div>
           ) : (
-            <div className="canvas-container">
-              <canvas ref={canvasRef} />
-            </div>
+            <>
+              <div className={`canvas-container ${zoomLevel !== 'fit' ? 'zoom-active' : ''}`}>
+                <canvas ref={canvasRef} style={getZoomStyle()} />
+              </div>
+              <div className="zoom-overlay" ref={zoomDropdownRef}>
+                <button
+                  className="zoom-trigger"
+                  onClick={() => setZoomDropdownOpen(!zoomDropdownOpen)}
+                >
+                  <span className="zoom-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.35-4.35" />
+                    </svg>
+                  </span>
+                  <span className="zoom-label">
+                    {zoomOptions.find(z => z.id === zoomLevel)?.label}
+                  </span>
+                  <span className={`zoom-arrow ${zoomDropdownOpen ? 'open' : ''}`}>▼</span>
+                </button>
+                {zoomDropdownOpen && (
+                  <div className="zoom-dropdown-menu">
+                    {zoomOptions.map(option => (
+                      <button
+                        key={option.id}
+                        className={`zoom-option ${zoomLevel === option.id ? 'active' : ''}`}
+                        onClick={() => {
+                          setZoomLevel(option.id)
+                          setZoomDropdownOpen(false)
+                        }}
+                      >
+                        <span className="zoom-option-label">{option.label}</span>
+                        <span className="zoom-option-desc">{option.description}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
 

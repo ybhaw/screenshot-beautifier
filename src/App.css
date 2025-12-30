@@ -27,6 +27,7 @@
   border: 2px dashed #ec4899;
   transition: border-color 0.2s, background-color 0.2s;
   overflow: auto;
+  position: relative;
 }
 
 .preview-area.dragging {
@@ -650,6 +651,120 @@
 
 .controls::-webkit-scrollbar-thumb:hover {
   background: #ec4899;
+}
+
+/* Zoom Overlay */
+.zoom-overlay {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  z-index: 50;
+}
+
+.zoom-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(26, 26, 46, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 8px;
+  color: #c4b5fd;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.zoom-trigger:hover {
+  border-color: #ec4899;
+  background: rgba(26, 26, 46, 0.95);
+  color: #f472b6;
+}
+
+.zoom-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a78bfa;
+}
+
+.zoom-label {
+  font-weight: 500;
+  color: #fff;
+  min-width: 70px;
+}
+
+.zoom-arrow {
+  font-size: 0.6rem;
+  color: #a78bfa;
+  transition: transform 0.2s;
+}
+
+.zoom-arrow.open {
+  transform: rotate(180deg);
+}
+
+.zoom-dropdown-menu {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  min-width: 160px;
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.zoom-option {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  background: transparent;
+  border: none;
+  color: #c4b5fd;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.zoom-option:hover {
+  background: rgba(139, 92, 246, 0.15);
+  color: #fff;
+}
+
+.zoom-option.active {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+  color: #fff;
+}
+
+.zoom-option.active .zoom-option-label {
+  font-weight: 600;
+}
+
+.zoom-option-label {
+  font-weight: 500;
+}
+
+.zoom-option-desc {
+  font-size: 0.7rem;
+  color: #888;
+}
+
+/* Canvas zoom active state */
+.canvas-container.zoom-active {
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 16px;
+}
+
+.canvas-container.zoom-active canvas {
+  max-width: none;
 }
 
 /* Responsive */
