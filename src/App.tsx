@@ -133,8 +133,14 @@ function App() {
         }
         break
       default: // auto
-        canvasWidth = imgWidth + padding * 2
-        canvasHeight = imgHeight + padding * 2
+        if (settings.position === 'center') {
+          canvasWidth = imgWidth + padding * 2
+          canvasHeight = imgHeight + padding * 2
+        } else {
+          // Add extra space for non-center positions
+          canvasWidth = imgWidth + padding * 3
+          canvasHeight = imgHeight + padding * 3
+        }
     }
 
     canvas.width = canvasWidth
@@ -279,11 +285,6 @@ function App() {
 
   return (
     <div className="app">
-      <header className="header">
-        <h1>Screenshot Beautifier</h1>
-        <p className="subtitle">Paste, drop, or upload a screenshot to beautify it</p>
-      </header>
-
       <div className="main-content">
         <div
           className={`preview-area ${isDragging ? 'dragging' : ''}`}
@@ -472,10 +473,6 @@ function App() {
           )}
         </div>
       </div>
-
-      <footer className="footer">
-        <p>Use Cmd/Ctrl+C to copy or Cmd/Ctrl+S to save the image</p>
-      </footer>
     </div>
   )
 }
