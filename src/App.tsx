@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import './App.css'
+import { proportionSections, getProportionById, getSectionForProportion } from './proportions.config'
 
 interface Settings {
-  proportion: 'auto' | 'square' | '16:9' | '4:3'
+  proportion: string
   browserTheme: 'none' | 'light' | 'dark'
   padding: 'none' | 'small' | 'medium' | 'large'
   bgColor1: string
@@ -31,19 +32,15 @@ const defaultSettings: Settings = {
 
 const paddingValues = { none: 0, small: 40, medium: 80, large: 120 }
 const radiusValues = { none: 0, small: 8, medium: 16, large: 24 }
-const shadowValues = {
-  none: 'none',
-  small: '0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)',
-  medium: '0 10px 25px rgba(0,0,0,0.2), 0 6px 10px rgba(0,0,0,0.1)',
-  large: '0 25px 50px rgba(0,0,0,0.3), 0 12px 24px rgba(0,0,0,0.15)',
-}
 
 function App() {
   const [image, setImage] = useState<HTMLImageElement | null>(null)
   const [settings, setSettings] = useState<Settings>(defaultSettings)
   const [isDragging, setIsDragging] = useState(false)
+  const [proportionDropdownOpen, setProportionDropdownOpen] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const proportionDropdownRef = useRef<HTMLDivElement>(null)
 
   const updateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
     setSettings(prev => ({ ...prev, [key]: value }))
@@ -94,6 +91,17 @@ function App() {
     return () => document.removeEventListener('paste', handlePaste)
   }, [handlePaste])
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (proportionDropdownRef.current && !proportionDropdownRef.current.contains(e.target as Node)) {
+        setProportionDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   // Render canvas
   useEffect(() => {
     if (!canvasRef.current || !image) return
@@ -112,35 +120,30 @@ function App() {
     const imgWidth = image.width
     const imgHeight = image.height + browserBarHeight
 
-    switch (settings.proportion) {
-      case 'square':
-        canvasWidth = canvasHeight = Math.max(imgWidth, imgHeight) + padding * 2
-        break
-      case '16:9':
+    const proportionConfig = getProportionById(settings.proportion)
+    const ratio = proportionConfig?.ratio
+
+    if (ratio === null || ratio === undefined) {
+      // Auto mode - fit to image
+      if (settings.position === 'center') {
         canvasWidth = imgWidth + padding * 2
-        canvasHeight = canvasWidth * (9 / 16)
-        if (canvasHeight < imgHeight + padding * 2) {
-          canvasHeight = imgHeight + padding * 2
-          canvasWidth = canvasHeight * (16 / 9)
-        }
-        break
-      case '4:3':
-        canvasWidth = imgWidth + padding * 2
-        canvasHeight = canvasWidth * (3 / 4)
-        if (canvasHeight < imgHeight + padding * 2) {
-          canvasHeight = imgHeight + padding * 2
-          canvasWidth = canvasHeight * (4 / 3)
-        }
-        break
-      default: // auto
-        if (settings.position === 'center') {
-          canvasWidth = imgWidth + padding * 2
-          canvasHeight = imgHeight + padding * 2
-        } else {
-          // Add extra space for non-center positions
-          canvasWidth = imgWidth + padding * 3
-          canvasHeight = imgHeight + padding * 3
-        }
+        canvasHeight = imgHeight + padding * 2
+      } else {
+        // Add extra space for non-center positions
+        canvasWidth = imgWidth + padding * 3
+        canvasHeight = imgHeight + padding * 3
+      }
+    } else if (ratio === 1) {
+      // Square
+      canvasWidth = canvasHeight = Math.max(imgWidth, imgHeight) + padding * 2
+    } else {
+      // Custom aspect ratio
+      canvasWidth = imgWidth + padding * 2
+      canvasHeight = canvasWidth / ratio
+      if (canvasHeight < imgHeight + padding * 2) {
+        canvasHeight = imgHeight + padding * 2
+        canvasWidth = canvasHeight * ratio
+      }
     }
 
     canvas.width = canvasWidth
@@ -322,16 +325,51 @@ function App() {
 
           <div className="control-group">
             <label>Proportion</label>
-            <div className="button-group">
-              {(['auto', 'square', '16:9', '4:3'] as const).map(p => (
-                <button
-                  key={p}
-                  className={settings.proportion === p ? 'active' : ''}
-                  onClick={() => updateSetting('proportion', p)}
-                >
-                  {p}
-                </button>
-              ))}
+            <div className="proportion-dropdown" ref={proportionDropdownRef}>
+              <button
+                className="proportion-dropdown-trigger"
+                onClick={() => setProportionDropdownOpen(!proportionDropdownOpen)}
+              >
+                <span className="proportion-selected">
+                  {(() => {
+                    const prop = getProportionById(settings.proportion)
+                    const section = getSectionForProportion(settings.proportion)
+                    return prop ? (
+                      <>
+                        <span className="proportion-label">{prop.label}</span>
+                        {section && section.id !== 'common' && (
+                          <span className="proportion-section-tag">{section.label}</span>
+                        )}
+                      </>
+                    ) : 'Select...'
+                  })()}
+                </span>
+                <span className={`proportion-arrow ${proportionDropdownOpen ? 'open' : ''}`}>▼</span>
+              </button>
+              {proportionDropdownOpen && (
+                <div className="proportion-dropdown-menu">
+                  {proportionSections.map(section => (
+                    <div key={section.id} className="proportion-section">
+                      <div className="proportion-section-header">{section.label}</div>
+                      {section.options.map(option => (
+                        <button
+                          key={option.id}
+                          className={`proportion-option ${settings.proportion === option.id ? 'active' : ''}`}
+                          onClick={() => {
+                            updateSetting('proportion', option.id)
+                            setProportionDropdownOpen(false)
+                          }}
+                        >
+                          <span className="proportion-option-label">{option.label}</span>
+                          {option.description && (
+                            <span className="proportion-option-desc">{option.description}</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
