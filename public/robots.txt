@@ -1,0 +1,15 @@
+# Robots.txt for Screenshot Beautifier
+# https://screenshot-beautifier.ybhaw.com/
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://screenshot-beautifier.ybhaw.com/sitemap.xml
+
+# Crawl delay (optional, for politeness)
+Crawl-delay: 1
+
+# Block common non-content paths
+Disallow: /assets/*.js.map
+Disallow: /assets/*.css.map
