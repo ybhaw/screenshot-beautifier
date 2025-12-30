@@ -411,7 +411,7 @@ function App() {
         const scaleY = containerHeight / canvas.height
         const scale = Math.min(scaleX, scaleY, 1) // Don't scale up, only down
         if (scale < 1) {
-          return { maxWidth: 'none', transform: `scale(${scale})`, transformOrigin: 'top left' }
+          return { maxWidth: 'none', transform: `scale(${scale})`, transformOrigin: 'center center' }
         }
         return { maxWidth: 'none', transform: 'none' }
       }
@@ -468,7 +468,7 @@ function App() {
             </div>
           ) : (
             <>
-              <div className={`canvas-container ${zoomLevel !== 'fit' ? 'zoom-active' : ''}`}>
+              <div className={`canvas-container ${zoomLevel === 'fit' ? 'zoom-fit' : 'zoom-active'}`}>
                 <canvas ref={canvasRef} style={getZoomStyle()} />
               </div>
               <div className="zoom-overlay" ref={zoomDropdownRef}>
