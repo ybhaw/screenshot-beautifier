@@ -16,6 +16,8 @@ interface Settings {
   innerRadius: 'none' | 'small' | 'medium' | 'large'
   position: 'center' | 'top-left' | 'top' | 'top-right' | 'left' | 'right' | 'bottom-left' | 'bottom' | 'bottom-right'
   shadow: 'none' | 'small' | 'medium' | 'large'
+  screenshotBorder: 'none' | 'small' | 'medium' | 'large'
+  imageBorder: 'none' | 'small' | 'medium' | 'large'
 }
 
 const defaultSettings: Settings = {
@@ -30,10 +32,13 @@ const defaultSettings: Settings = {
   innerRadius: 'small',
   position: 'center',
   shadow: 'medium',
+  screenshotBorder: 'none',
+  imageBorder: 'none',
 }
 
 const paddingValues = { none: 0, small: 40, medium: 80, large: 120 }
 const radiusValues = { none: 0, small: 8, medium: 16, large: 24 }
+const borderWidthValues = { none: 0, small: 2, medium: 4, large: 6 }
 
 function App() {
   const [image, setImage] = useState<HTMLImageElement | null>(null)
@@ -309,6 +314,43 @@ function App() {
     // Draw the image
     ctx.drawImage(image, imgX, imgY + themeBarHeight)
     ctx.restore()
+
+    // Draw screenshot border (around the screenshot)
+    const screenshotBorderWidth = borderWidthValues[settings.screenshotBorder]
+    if (screenshotBorderWidth > 0) {
+      ctx.save()
+      ctx.strokeStyle = settings.bgColor1
+      ctx.lineWidth = screenshotBorderWidth
+      ctx.beginPath()
+      ctx.roundRect(
+        imgX + screenshotBorderWidth / 2,
+        imgY + screenshotBorderWidth / 2,
+        imgWidth - screenshotBorderWidth,
+        imgHeight - screenshotBorderWidth,
+        Math.max(0, innerRadius - screenshotBorderWidth / 2)
+      )
+      ctx.stroke()
+      ctx.restore()
+    }
+
+    // Draw image border (around the entire canvas)
+    const imageBorderWidth = borderWidthValues[settings.imageBorder]
+    if (imageBorderWidth > 0) {
+      ctx.save()
+      ctx.strokeStyle = settings.bgColor2
+      ctx.lineWidth = imageBorderWidth
+      const outerRadius = radiusValues[settings.outerRadius]
+      ctx.beginPath()
+      ctx.roundRect(
+        imageBorderWidth / 2,
+        imageBorderWidth / 2,
+        canvasWidth - imageBorderWidth,
+        canvasHeight - imageBorderWidth,
+        Math.max(0, outerRadius - imageBorderWidth / 2)
+      )
+      ctx.stroke()
+      ctx.restore()
+    }
 
     // Trigger zoom recalculation
     setCanvasReady(prev => prev + 1)
@@ -914,6 +956,36 @@ function App() {
                   onClick={() => updateSetting('shadow', s)}
                 >
                   {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="control-group">
+            <label>Screenshot Border</label>
+            <div className="button-group">
+              {(['none', 'small', 'medium', 'large'] as const).map(b => (
+                <button
+                  key={b}
+                  className={settings.screenshotBorder === b ? 'active' : ''}
+                  onClick={() => updateSetting('screenshotBorder', b)}
+                >
+                  {b}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="control-group">
+            <label>Image Border</label>
+            <div className="button-group">
+              {(['none', 'small', 'medium', 'large'] as const).map(b => (
+                <button
+                  key={b}
+                  className={settings.imageBorder === b ? 'active' : ''}
+                  onClick={() => updateSetting('imageBorder', b)}
+                >
+                  {b}
                 </button>
               ))}
             </div>
