@@ -82,15 +82,19 @@
   border-radius: 8px;
 }
 
-.controls {
+.sidebar-wrapper {
   flex-shrink: 0;
+  position: relative;
+  max-height: calc(100vh - 2rem);
+}
+
+.controls {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 16px;
   padding: 1.25rem;
   overflow-y: auto;
   max-height: calc(100vh - 2rem);
   border: 1px solid rgba(236, 72, 153, 0.2);
-  position: relative;
 }
 
 .resize-handle {
@@ -103,6 +107,7 @@
   background: transparent;
   transition: background 0.2s;
   border-radius: 16px 0 0 16px;
+  z-index: 10;
 }
 
 .resize-handle:hover {
@@ -654,9 +659,17 @@
     padding: 0.5rem;
   }
 
-  .controls {
-    width: 100%;
+  .sidebar-wrapper {
+    width: 100% !important;
     max-height: none;
+  }
+
+  .controls {
+    max-height: none;
+  }
+
+  .resize-handle {
+    display: none;
   }
 
   .preview-area {

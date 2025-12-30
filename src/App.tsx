@@ -14,7 +14,7 @@ interface Settings {
   gradientAngle: number
   outerRadius: 'none' | 'small' | 'medium' | 'large'
   innerRadius: 'none' | 'small' | 'medium' | 'large'
-  position: 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+  position: 'center' | 'top-left' | 'top' | 'top-right' | 'left' | 'right' | 'bottom-left' | 'bottom' | 'bottom-right'
   shadow: 'none' | 'small' | 'medium' | 'large'
 }
 
@@ -197,12 +197,28 @@ function App() {
         imgX = padding
         imgY = padding
         break
+      case 'top':
+        imgX = (canvasWidth - imgWidth) / 2
+        imgY = padding
+        break
       case 'top-right':
         imgX = canvasWidth - imgWidth - padding
         imgY = padding
         break
+      case 'left':
+        imgX = padding
+        imgY = (canvasHeight - imgHeight) / 2
+        break
+      case 'right':
+        imgX = canvasWidth - imgWidth - padding
+        imgY = (canvasHeight - imgHeight) / 2
+        break
       case 'bottom-left':
         imgX = padding
+        imgY = canvasHeight - imgHeight - padding
+        break
+      case 'bottom':
+        imgX = (canvasWidth - imgWidth) / 2
         imgY = canvasHeight - imgHeight - padding
         break
       case 'bottom-right':
@@ -386,11 +402,12 @@ function App() {
           )}
         </div>
 
-        <div className="controls" style={{ width: sidebarWidth }}>
+        <div className="sidebar-wrapper" style={{ width: sidebarWidth }}>
           <div
             className="resize-handle"
             onMouseDown={() => setIsResizing(true)}
           />
+          <div className="controls">
           <div className="controls-header">
             <h2>Settings</h2>
             <button className="reset-btn" onClick={reset}>Reset</button>
@@ -798,7 +815,7 @@ function App() {
           <div className="control-group">
             <label>Position</label>
             <div className="position-grid">
-              {(['top-left', 'top-right', 'center', 'bottom-left', 'bottom-right'] as const).map(pos => (
+              {(['top-left', 'top', 'top-right', 'left', 'center', 'right', 'bottom-left', 'bottom', 'bottom-right'] as const).map(pos => (
                 <button
                   key={pos}
                   className={`position-btn ${settings.position === pos ? 'active' : ''}`}
@@ -821,6 +838,7 @@ function App() {
               </button>
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>
