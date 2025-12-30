@@ -5,7 +5,7 @@ export interface ThemeOption {
   // Visual properties
   barHeight: number
   barColor: string
-  barColorDark?: string  // For themes with light/dark variants
+  barColorDark?: string // For themes with light/dark variants
   controlsPosition: 'left' | 'right'
   controls: ThemeControl[]
 }
@@ -35,9 +35,9 @@ export const themeSections: ThemeSection[] = [
         barHeight: 0,
         barColor: 'transparent',
         controlsPosition: 'left',
-        controls: []
-      }
-    ]
+        controls: [],
+      },
+    ],
   },
   {
     id: 'browser',
@@ -53,8 +53,8 @@ export const themeSections: ThemeSection[] = [
         controls: [
           { type: 'circle', color: '#ff5f56', size: 12 },
           { type: 'circle', color: '#ffbd2e', size: 12 },
-          { type: 'circle', color: '#27ca40', size: 12 }
-        ]
+          { type: 'circle', color: '#27ca40', size: 12 },
+        ],
       },
       {
         id: 'browser-dark',
@@ -66,10 +66,10 @@ export const themeSections: ThemeSection[] = [
         controls: [
           { type: 'circle', color: '#ff5f56', size: 12 },
           { type: 'circle', color: '#ffbd2e', size: 12 },
-          { type: 'circle', color: '#27ca40', size: 12 }
-        ]
-      }
-    ]
+          { type: 'circle', color: '#27ca40', size: 12 },
+        ],
+      },
+    ],
   },
   {
     id: 'macos',
@@ -85,8 +85,8 @@ export const themeSections: ThemeSection[] = [
         controls: [
           { type: 'circle', color: '#ff5f56', size: 12 },
           { type: 'circle', color: '#ffbd2e', size: 12 },
-          { type: 'circle', color: '#27ca40', size: 12 }
-        ]
+          { type: 'circle', color: '#27ca40', size: 12 },
+        ],
       },
       {
         id: 'macos-dark',
@@ -98,10 +98,10 @@ export const themeSections: ThemeSection[] = [
         controls: [
           { type: 'circle', color: '#ff5f56', size: 12 },
           { type: 'circle', color: '#ffbd2e', size: 12 },
-          { type: 'circle', color: '#27ca40', size: 12 }
-        ]
-      }
-    ]
+          { type: 'circle', color: '#27ca40', size: 12 },
+        ],
+      },
+    ],
   },
   {
     id: 'windows',
@@ -115,10 +115,10 @@ export const themeSections: ThemeSection[] = [
         barColor: '#f3f3f3',
         controlsPosition: 'right',
         controls: [
-          { type: 'icon', color: '#000000', size: 10 },  // minimize
-          { type: 'icon', color: '#000000', size: 10 },  // maximize
-          { type: 'icon', color: '#000000', size: 10 }   // close
-        ]
+          { type: 'icon', color: '#000000', size: 10 }, // minimize
+          { type: 'icon', color: '#000000', size: 10 }, // maximize
+          { type: 'icon', color: '#000000', size: 10 }, // close
+        ],
       },
       {
         id: 'windows-dark',
@@ -130,10 +130,10 @@ export const themeSections: ThemeSection[] = [
         controls: [
           { type: 'icon', color: '#ffffff', size: 10 },
           { type: 'icon', color: '#ffffff', size: 10 },
-          { type: 'icon', color: '#ffffff', size: 10 }
-        ]
-      }
-    ]
+          { type: 'icon', color: '#ffffff', size: 10 },
+        ],
+      },
+    ],
   },
   {
     id: 'terminal',
@@ -149,8 +149,8 @@ export const themeSections: ThemeSection[] = [
         controls: [
           { type: 'circle', color: '#ff5f56', size: 12 },
           { type: 'circle', color: '#ffbd2e', size: 12 },
-          { type: 'circle', color: '#27ca40', size: 12 }
-        ]
+          { type: 'circle', color: '#27ca40', size: 12 },
+        ],
       },
       {
         id: 'terminal-ubuntu',
@@ -162,8 +162,8 @@ export const themeSections: ThemeSection[] = [
         controls: [
           { type: 'circle', color: '#f46c6c', size: 12 },
           { type: 'circle', color: '#f4c66c', size: 12 },
-          { type: 'circle', color: '#6cf46c', size: 12 }
-        ]
+          { type: 'circle', color: '#6cf46c', size: 12 },
+        ],
       },
       {
         id: 'terminal-windows',
@@ -175,8 +175,8 @@ export const themeSections: ThemeSection[] = [
         controls: [
           { type: 'icon', color: '#ffffff', size: 10 },
           { type: 'icon', color: '#ffffff', size: 10 },
-          { type: 'icon', color: '#ffffff', size: 10 }
-        ]
+          { type: 'icon', color: '#ffffff', size: 10 },
+        ],
       },
       {
         id: 'terminal-vscode',
@@ -188,10 +188,10 @@ export const themeSections: ThemeSection[] = [
         controls: [
           { type: 'icon', color: '#858585', size: 10 },
           { type: 'icon', color: '#858585', size: 10 },
-          { type: 'icon', color: '#858585', size: 10 }
-        ]
-      }
-    ]
+          { type: 'icon', color: '#858585', size: 10 },
+        ],
+      },
+    ],
   },
   {
     id: 'code-editor',
@@ -207,8 +207,8 @@ export const themeSections: ThemeSection[] = [
         controls: [
           { type: 'icon', color: '#858585', size: 10 },
           { type: 'icon', color: '#858585', size: 10 },
-          { type: 'icon', color: '#858585', size: 10 }
-        ]
+          { type: 'icon', color: '#858585', size: 10 },
+        ],
       },
       {
         id: 'vscode-light',
@@ -220,8 +220,8 @@ export const themeSections: ThemeSection[] = [
         controls: [
           { type: 'icon', color: '#444444', size: 10 },
           { type: 'icon', color: '#444444', size: 10 },
-          { type: 'icon', color: '#444444', size: 10 }
-        ]
+          { type: 'icon', color: '#444444', size: 10 },
+        ],
       },
       {
         id: 'sublime',
@@ -233,10 +233,10 @@ export const themeSections: ThemeSection[] = [
         controls: [
           { type: 'circle', color: '#ff5f56', size: 12 },
           { type: 'circle', color: '#ffbd2e', size: 12 },
-          { type: 'circle', color: '#27ca40', size: 12 }
-        ]
-      }
-    ]
+          { type: 'circle', color: '#27ca40', size: 12 },
+        ],
+      },
+    ],
   },
   {
     id: 'mobile',
@@ -249,7 +249,7 @@ export const themeSections: ThemeSection[] = [
         barHeight: 44,
         barColor: '#000000',
         controlsPosition: 'left',
-        controls: []  // Special rendering for iOS status bar
+        controls: [], // Special rendering for iOS status bar
       },
       {
         id: 'android-status',
@@ -258,21 +258,21 @@ export const themeSections: ThemeSection[] = [
         barHeight: 24,
         barColor: '#000000',
         controlsPosition: 'left',
-        controls: []  // Special rendering for Android status bar
-      }
-    ]
-  }
+        controls: [], // Special rendering for Android status bar
+      },
+    ],
+  },
 ]
 
 // Get all theme IDs for type safety
 export const getAllThemeIds = (): string[] => {
-  return themeSections.flatMap(section => section.options.map(opt => opt.id))
+  return themeSections.flatMap((section) => section.options.map((opt) => opt.id))
 }
 
 // Find theme by ID
 export const getThemeById = (id: string): ThemeOption | undefined => {
   for (const section of themeSections) {
-    const found = section.options.find(opt => opt.id === id)
+    const found = section.options.find((opt) => opt.id === id)
     if (found) return found
   }
   return undefined
@@ -280,7 +280,5 @@ export const getThemeById = (id: string): ThemeOption | undefined => {
 
 // Get section for a theme ID
 export const getSectionForTheme = (id: string): ThemeSection | undefined => {
-  return themeSections.find(section =>
-    section.options.some(opt => opt.id === id)
-  )
+  return themeSections.find((section) => section.options.some((opt) => opt.id === id))
 }
