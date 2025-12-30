@@ -14,7 +14,6 @@ interface Settings {
   innerRadius: 'none' | 'small' | 'medium' | 'large'
   position: 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
   shadow: 'none' | 'small' | 'medium' | 'large'
-  noise: boolean
 }
 
 const defaultSettings: Settings = {
@@ -28,7 +27,6 @@ const defaultSettings: Settings = {
   innerRadius: 'small',
   position: 'center',
   shadow: 'medium',
-  noise: false,
 }
 
 const paddingValues = { none: 0, small: 40, medium: 80, large: 120 }
@@ -178,19 +176,6 @@ function App() {
     gradient.addColorStop(1, settings.bgColor2)
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, canvasWidth, canvasHeight)
-
-    // Add noise if enabled
-    if (settings.noise) {
-      const imageData = ctx.getImageData(0, 0, canvasWidth, canvasHeight)
-      const data = imageData.data
-      for (let i = 0; i < data.length; i += 4) {
-        const noise = (Math.random() - 0.5) * 20
-        data[i] = Math.min(255, Math.max(0, data[i] + noise))
-        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + noise))
-        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + noise))
-      }
-      ctx.putImageData(imageData, 0, 0)
-    }
 
     // Calculate image position
     let imgX: number
@@ -670,17 +655,6 @@ function App() {
                 </button>
               ))}
             </div>
-          </div>
-
-          <div className="control-group">
-            <label>
-              <input
-                type="checkbox"
-                checked={settings.noise}
-                onChange={(e) => updateSetting('noise', e.target.checked)}
-              />
-              Add Noise Texture
-            </label>
           </div>
 
           {image && (
