@@ -2,11 +2,13 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import './App.css'
 import { proportionSections, getProportionById, getSectionForProportion } from './proportions.config'
 import { themeSections, getThemeById, getSectionForTheme } from './theme.config'
+import { backgroundSections, getBackgroundById, getSectionForBackground } from './background.config'
 
 interface Settings {
   proportion: string
   theme: string
   padding: 'none' | 'small' | 'medium' | 'large'
+  backgroundTheme: string
   bgColor1: string
   bgColor2: string
   gradientAngle: number
@@ -20,6 +22,7 @@ const defaultSettings: Settings = {
   proportion: 'auto',
   theme: 'none',
   padding: 'medium',
+  backgroundTheme: 'pink-purple',
   bgColor1: '#ec4899',
   bgColor2: '#8b5cf6',
   gradientAngle: 135,
@@ -40,13 +43,17 @@ function App() {
   const [proportionSearch, setProportionSearch] = useState('')
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false)
   const [themeSearch, setThemeSearch] = useState('')
+  const [backgroundDropdownOpen, setBackgroundDropdownOpen] = useState(false)
+  const [backgroundSearch, setBackgroundSearch] = useState('')
   const [customRatio, setCustomRatio] = useState({ width: 16, height: 9 })
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const proportionDropdownRef = useRef<HTMLDivElement>(null)
   const themeDropdownRef = useRef<HTMLDivElement>(null)
+  const backgroundDropdownRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const themeSearchInputRef = useRef<HTMLInputElement>(null)
+  const backgroundSearchInputRef = useRef<HTMLInputElement>(null)
 
   const updateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
     setSettings(prev => ({ ...prev, [key]: value }))
@@ -105,6 +112,9 @@ function App() {
       }
       if (themeDropdownRef.current && !themeDropdownRef.current.contains(e.target as Node)) {
         setThemeDropdownOpen(false)
+      }
+      if (backgroundDropdownRef.current && !backgroundDropdownRef.current.contains(e.target as Node)) {
+        setBackgroundDropdownOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -574,25 +584,139 @@ function App() {
 
           <div className="control-group">
             <label>Background</label>
-            <div className="color-inputs">
-              <input
-                type="color"
-                value={settings.bgColor1}
-                onChange={(e) => updateSetting('bgColor1', e.target.value)}
-              />
-              <input
-                type="color"
-                value={settings.bgColor2}
-                onChange={(e) => updateSetting('bgColor2', e.target.value)}
-              />
-              <input
-                type="range"
-                min="0"
-                max="360"
-                value={settings.gradientAngle}
-                onChange={(e) => updateSetting('gradientAngle', parseInt(e.target.value))}
-                title="Gradient angle"
-              />
+            <div className="proportion-dropdown" ref={backgroundDropdownRef}>
+              <button
+                className="proportion-dropdown-trigger"
+                onClick={() => {
+                  setBackgroundDropdownOpen(!backgroundDropdownOpen)
+                  if (!backgroundDropdownOpen) {
+                    setBackgroundSearch('')
+                    setTimeout(() => backgroundSearchInputRef.current?.focus(), 0)
+                  }
+                }}
+              >
+                <span className="proportion-selected">
+                  {(() => {
+                    if (settings.backgroundTheme === 'custom') {
+                      return (
+                        <>
+                          <span className="proportion-label">Custom</span>
+                          <span className="background-preview-colors">
+                            <span className="color-dot" style={{ background: settings.bgColor1 }}></span>
+                            <span className="color-dot" style={{ background: settings.bgColor2 }}></span>
+                          </span>
+                        </>
+                      )
+                    }
+                    const bg = getBackgroundById(settings.backgroundTheme)
+                    const section = getSectionForBackground(settings.backgroundTheme)
+                    return bg ? (
+                      <>
+                        <span className="proportion-label">{bg.label}</span>
+                        {section && (
+                          <span className="proportion-section-tag">{section.label}</span>
+                        )}
+                      </>
+                    ) : 'Select...'
+                  })()}
+                </span>
+                <span className={`proportion-arrow ${backgroundDropdownOpen ? 'open' : ''}`}>▼</span>
+              </button>
+              {backgroundDropdownOpen && (
+                <div className="proportion-dropdown-menu">
+                  <div className="proportion-search">
+                    <input
+                      ref={backgroundSearchInputRef}
+                      type="text"
+                      placeholder="Search..."
+                      value={backgroundSearch}
+                      onChange={(e) => setBackgroundSearch(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+
+                  {/* Custom background section */}
+                  {(backgroundSearch === '' || 'custom'.includes(backgroundSearch.toLowerCase())) && (
+                    <div className="proportion-section">
+                      <div className="proportion-section-header">Custom</div>
+                      <div className="background-custom">
+                        <input
+                          type="color"
+                          value={settings.bgColor1}
+                          onChange={(e) => {
+                            updateSetting('bgColor1', e.target.value)
+                            updateSetting('backgroundTheme', 'custom')
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <input
+                          type="color"
+                          value={settings.bgColor2}
+                          onChange={(e) => {
+                            updateSetting('bgColor2', e.target.value)
+                            updateSetting('backgroundTheme', 'custom')
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <input
+                          type="range"
+                          min="0"
+                          max="360"
+                          value={settings.gradientAngle}
+                          onChange={(e) => {
+                            updateSetting('gradientAngle', parseInt(e.target.value))
+                            updateSetting('backgroundTheme', 'custom')
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          title="Gradient angle"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Filtered sections */}
+                  {backgroundSections
+                    .map(section => ({
+                      ...section,
+                      options: section.options.filter(option =>
+                        backgroundSearch === '' ||
+                        option.label.toLowerCase().includes(backgroundSearch.toLowerCase()) ||
+                        option.description?.toLowerCase().includes(backgroundSearch.toLowerCase()) ||
+                        section.label.toLowerCase().includes(backgroundSearch.toLowerCase())
+                      )
+                    }))
+                    .filter(section => section.options.length > 0)
+                    .map(section => (
+                      <div key={section.id} className="proportion-section">
+                        <div className="proportion-section-header">{section.label}</div>
+                        {section.options.map(option => (
+                          <button
+                            key={option.id}
+                            className={`proportion-option background-option ${settings.backgroundTheme === option.id ? 'active' : ''}`}
+                            onClick={() => {
+                              updateSetting('backgroundTheme', option.id)
+                              updateSetting('bgColor1', option.bgColor1)
+                              updateSetting('bgColor2', option.bgColor2)
+                              updateSetting('gradientAngle', option.gradientAngle)
+                              setBackgroundDropdownOpen(false)
+                            }}
+                          >
+                            <span
+                              className="background-option-preview"
+                              style={{
+                                background: `linear-gradient(${option.gradientAngle}deg, ${option.bgColor1}, ${option.bgColor2})`
+                              }}
+                            ></span>
+                            <span className="proportion-option-label">{option.label}</span>
+                            {option.description && (
+                              <span className="proportion-option-desc">{option.description}</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
           </div>
 

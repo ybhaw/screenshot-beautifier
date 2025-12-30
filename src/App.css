@@ -513,6 +513,78 @@
   color: white;
 }
 
+/* Background Theme Dropdown */
+.background-preview-colors {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.color-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.background-custom {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.background-custom input[type="color"] {
+  width: 40px;
+  height: 32px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  background: rgba(139, 92, 246, 0.1);
+  padding: 2px;
+}
+
+.background-custom input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.background-custom input[type="color"]::-webkit-color-swatch {
+  border-radius: 4px;
+  border: none;
+}
+
+.background-custom input[type="range"] {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(139, 92, 246, 0.3);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.background-custom input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+  cursor: pointer;
+}
+
+.background-option {
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.background-option-preview {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .export-buttons {
   display: flex;
   flex-direction: column;
