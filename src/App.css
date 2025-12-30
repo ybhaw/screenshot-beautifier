@@ -261,31 +261,6 @@
   justify-content: center;
 }
 
-.position-btn:nth-child(1) {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.position-btn:nth-child(2) {
-  grid-column: 3;
-  grid-row: 1;
-}
-
-.position-btn:nth-child(3) {
-  grid-column: 2;
-  grid-row: 2;
-}
-
-.position-btn:nth-child(4) {
-  grid-column: 1;
-  grid-row: 3;
-}
-
-.position-btn:nth-child(5) {
-  grid-column: 3;
-  grid-row: 3;
-}
-
 .position-btn:hover {
   border-color: #ec4899;
   color: #f472b6;
